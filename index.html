@@ -7,190 +7,293 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
         body {
             background: radial-gradient(circle at top, #0c1445 0%, #050505 100%);
-            color: #ffffff;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0; height: 100vh; display: flex; flex-direction: column;
             overflow: hidden; position: relative;
         }
-
-        /* Starry Background */
         body::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 200%;
-            background-image: 
-                radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(1.5px 1.5px at 50px 160px, #ddd, rgba(0,0,0,0));
-            background-size: 250px 250px;
-            animation: stars-scroll 60s linear infinite;
-            opacity: 0.4; z-index: 0;
+            background-image: radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0));
+            background-size: 250px 250px; animation: stars-scroll 60s linear infinite; opacity: 0.3; z-index: 0;
         }
         @keyframes stars-scroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 
-        #table { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; z-index: 10; position: relative; }
+        /* OVERLAYS */
+        .overlay {
+            position: fixed; inset: 0; z-index: 10000; background: rgba(5, 5, 5, 0.98);
+            backdrop-filter: blur(20px); display: none; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px; text-align: center;
+        }
+        .ui-card {
+            background: #111; border: 1px solid #1a237e; padding: 40px 30px; border-radius: 28px;
+            width: 100%; max-width: 360px; box-shadow: 0 30px 70px rgba(0,0,0,1);
+        }
+        .auth-input {
+            width: 100%; background: #000; border: 1px solid #222; color: #fff;
+            padding: 16px; margin: 15px 0; border-radius: 14px; font-size: 16px; text-align: center; outline: none;
+        }
+        .btn-primary { background: #00ff88; color: #000; border: none; width: 100%; padding: 18px; border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 100%; padding: 14px; border-radius: 50px; font-weight: 700; cursor: pointer; margin-top: 12px; }
 
+        /* GAME TABLE */
+        #table { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; position: relative; }
         .black-card {
-            background-color: #111 !important; color: #fff !important;
-            width: 260px; height: 360px; border-radius: 20px; padding: 30px;
-            border: 1px solid #1a237e; display: flex; flex-direction: column;
-            justify-content: space-between; box-shadow: 0 15px 50px rgba(0,0,0,0.8);
-            z-index: 5; transition: opacity 0.5s ease, transform 0.5s ease;
+            background-color: #111 !important; color: #fff !important; width: 260px; height: 360px;
+            border-radius: 20px; padding: 30px; border: 1px solid #1a237e; display: flex;
+            flex-direction: column; justify-content: space-between; box-shadow: 0 15px 50px rgba(0,0,0,0.8);
         }
-
-        #hand-area {
-            height: 250px; width: 100%; background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; padding: 0 20px; overflow-x: auto;
-            scrollbar-width: none; z-index: 20; transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            touch-action: pan-x;
-        }
-
-        /* FIXED GEOMETRY RESPONSE CARDS */
-        .white-card {
-            width: 140px !important; min-width: 140px !important;
-            height: 190px !important; min-height: 190px !important;
-            background-color: #ffffff !important; color: #000000 !important;
-            border-radius: 12px; padding: 15px; margin: 0 10px;
-            display: flex; flex-direction: column; justify-content: flex-start;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4); flex-shrink: 0;
-        }
-        .white-card .card-text { margin-bottom: auto; }
-
-        /* CLEAN CONFIRMATION HUD */
-        #confirmation-hud {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); text-align: center;
-            display: none; z-index: 100; width: 90%;
-        }
-
-        .hud-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: #00ff88; margin-bottom: 10px; text-shadow: 0 0 15px rgba(0,255,136,0.3); }
-        .hud-sub { font-size: 15px; opacity: 0.8; line-height: 1.6; margin-bottom: 35px; max-width: 300px; margin-left: auto; margin-right: auto; }
-        
-        #btn-next { background: #00ff88; color: #000; border: none; padding: 14px 35px; border-radius: 40px; font-weight: 900; cursor: pointer; letter-spacing: 1px; }
-
-        /* GHOSTS & ANIMATIONS */
-        .ghost-card { position: fixed; pointer-events: auto; z-index: 9999; background-color: #ffffff !important; color: #000000 !important; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-start; box-shadow: 0 30px 80px rgba(0,0,0,1); width: 140px; height: 190px; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
-        .ghost-played { left: calc(50% - 90px) !important; top: 30% !important; width: 180px !important; height: 250px !important; transform: rotate(-3deg); }
-        .ghost-submitted { border: 5px solid #00ff88 !important; animation: pulse 1s infinite alternate; }
-        .ghost-sent { transform: translateY(-120vh) scale(0.4) rotate(20deg) !important; opacity: 0; transition: all 0.7s cubic-bezier(0.5, 0, 0.7, 0.5) !important; }
-
-        @keyframes pulse { from { box-shadow: 0 0 15px rgba(0,255,136,0.4); } to { box-shadow: 0 0 35px rgba(0,255,136,0.8); } }
-        #btn-capture { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; border: none; padding: 15px 30px; border-radius: 40px; font-weight: 900; display: none; z-index: 10001; }
+        #hand-area { height: 220px; width: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(25px); display: flex; align-items: center; padding: 0 20px; overflow-x: auto; z-index: 20; border-top: 1px solid rgba(255,255,255,0.1); }
+        .white-card { width: 140px !important; min-width: 140px !important; height: 180px !important; background-color: #fff !important; color: #000 !important; border-radius: 12px; padding: 15px; margin: 0 10px; flex-shrink: 0; box-shadow: 0 8px 20px rgba(0,0,0,0.4); position: relative; }
+        .ghost-card { position: fixed; z-index: 9999; border-radius: 12px; padding: 20px; box-shadow: 0 30px 80px rgba(0,0,0,1); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .ghost-played { left: calc(50% - 90px) !important; top: 30% !important; width: 180px !important; height: 250px !important; }
+        .ghost-submitted { border: 5px solid #00ff88 !important; }
+        .ghost-sent { transform: translateY(-120vh) scale(0.2) !important; opacity: 0; }
         
         .card-text { font-weight: 700; line-height: 1.3; pointer-events: none; word-wrap: break-word; }
-        .black-card .card-text { font-size: 20px; }
-        .white-card .card-text { font-size: 13px; }
         .footer { font-size: 8px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-top: 10px; }
+        
+        /* HUD ELEMENTS */
+        #room-tag { position: fixed; top: 20px; left: 20px; font-size: 10px; font-weight: 900; color: #00ff88; z-index: 1000; background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 20px; border: 1px solid #00ff88; }
+        #czar-mode-btn { position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 10px; z-index: 1000; cursor: pointer; font-weight: 900; }
+        .share-row { display: flex; gap: 10px; width: 100%; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div id="table">
-        <div id="confirmation-hud">
-            <div class="hud-title">BLOB SUBMITTED</div>
-            <div class="hud-sub">Waiting for others to cast their Blobs Against the Sky...</div>
-            <button id="btn-next" onclick="initGame()">Next Round</button>
+    <div id="room-tag">NO ROOM</div>
+    <button id="czar-mode-btn" onclick="toggleCzarRole()">Become Czar</button>
+
+    <div id="auth-overlay" class="overlay" style="display: flex;">
+        <div class="ui-card">
+            <h2 style="color:#00ff88; margin:0; letter-spacing: 4px; font-size: 32px;">B.A.T.S.</h2>
+            <p style="font-size:11px; opacity:0.6; margin: 10px 0 30px 0; text-transform: uppercase;">Blobs Against the Sky</p>
+            <input type="text" id="auth-handle" class="auth-input" placeholder="handle.bsky.social">
+            <button class="btn-primary" onclick="login()">Connect Account</button>
+            <button class="btn-secondary" onclick="guestMode()">Guest Mode</button>
         </div>
-        <div id="screenshot-area">
-            <div class="black-card" id="main-black-card">
-                <div id="prompt-text" class="card-text">Summoning Blobs...</div>
-                <div class="footer">Blobs Against the Sky</div>
+    </div>
+
+    <div id="lobby-overlay" class="overlay">
+        <div class="ui-card">
+            <h2 style="color:#00ff88; margin:0; font-size: 24px;">THE LOBBY</h2>
+            <p style="font-size:12px; opacity:0.6; margin-bottom:25px;">Ready to cast into the Sky?</p>
+            <button class="btn-primary" id="host-btn" onclick="hostGame()">Host Session</button>
+            <div style="margin: 25px 0; border-top: 1px solid #222; padding-top: 25px;">
+                <input type="text" id="join-input" class="auth-input" placeholder="ROOM CODE">
+                <button class="btn-secondary" onclick="joinGame()">Join Room</button>
             </div>
         </div>
     </div>
 
-    <button id="btn-capture" onclick="takeScreenshot()">Capture Combination</button>
+    <div id="table">
+        <div id="confirmation-hud" style="display:none; text-align:center; z-index:100; width: 80%;">
+            <h1 style="color:#00ff88; margin-bottom: 5px;">BLOB CAST!</h1>
+            <p style="font-size: 14px; opacity: 0.8; margin-bottom: 25px;">Your combination is haunting the network.</p>
+            <button class="btn-primary" onclick="initGame()">Next Round</button>
+            <div class="share-row">
+                <button class="btn-secondary" onclick="takeScreenshot()">Save Image</button>
+                <button class="btn-secondary" onclick="shareToSky()">Post to Sky</button>
+            </div>
+        </div>
+        
+        <div id="main-black-card" class="black-card">
+            <div id="prompt-text" class="card-text">Waiting for connection...</div>
+            <div class="footer">Blobs Against the Sky</div>
+        </div>
+    </div>
+
+    <button id="btn-capture" onclick="takeScreenshot()" style="display:none; position:fixed; bottom:240px; left:50%; transform:translateX(-50%); background:#fff; color:#000; border:none; padding:15px 30px; border-radius:40px; font-weight:900; z-index:10001; box-shadow: 0 10px 30px #000;">Ready to Cast</button>
     <div id="hand-area"></div>
 
-    <script>
+    <script type="module">
+        import { BrowserOAuthClient } from 'https://esm.sh/@atproto/oauth-client-browser';
+        import { BskyAgent } from 'https://esm.sh/@atproto/api';
+        
         const BASE_URL = `https://raw.githubusercontent.com/theygrewv/bats-engine/main/data`;
-        let activeGhost = null, originalCardSource = null, pressTimer, lastTap = 0, startX = 0, startY = 0;
 
-        async function initGame() {
+        const oauthClient = new BrowserOAuthClient({
+            handleResolver: 'https://bsky.social',
+            clientMetadata: 'https://bats.skydrops.app/client-metadata.json',
+        });
+
+        let agent = null, currentGameID = "", isCzar = false, isGuest = false;
+        let activeGhost = null, originalCardSource = null, pressTimer, lastTap = 0, startX = 0, startY = 0, czarInterval = null, seenRecords = new Set();
+
+        // --- AUTH ---
+        async function initAuth() {
+            try {
+                const result = await oauthClient.init();
+                if (result) {
+                    agent = new BskyAgent(result.session);
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    document.getElementById('lobby-overlay').style.display = 'flex';
+                }
+            } catch (err) { console.error("Session init failed"); }
+        }
+
+        window.login = async () => {
+            const handle = document.getElementById('auth-handle').value;
+            if (!handle) return;
+            await oauthClient.signIn(handle);
+        };
+
+        window.guestMode = () => {
+            isGuest = true;
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('lobby-overlay').style.display = 'flex';
+            document.getElementById('host-btn').style.opacity = '0.3';
+            document.getElementById('host-btn').disabled = true;
+        };
+
+        // --- LOBBY ---
+        function generateGameID() {
+            const adj = ["NEON", "SILENT", "GHOSTLY", "BLOODY", "COSMIC", "CHAOTIC", "VOID", "DARK", "ANGRY", "VOODOO"];
+            const noun = ["BAT", "BLOB", "SKY", "EYE", "FANG", "WING", "GRAVE", "SOUL", "VOID", "CROWN"];
+            return `${adj[Math.floor(Math.random()*adj.length)]}-${noun[Math.floor(Math.random()*noun.length)]}-${Math.floor(Math.random()*99)}`;
+        }
+
+        window.hostGame = () => {
+            if(isGuest) return;
+            currentGameID = generateGameID();
+            startSession();
+        };
+
+        window.joinGame = () => {
+            const input = document.getElementById('join-input').value.toUpperCase().trim();
+            if (!input) return alert("Enter Code");
+            currentGameID = input;
+            startSession();
+        };
+
+        function startSession() {
+            document.getElementById('lobby-overlay').style.display = 'none';
+            document.getElementById('room-tag').innerText = `ROOM: ${currentGameID}`;
+            window.initGame();
+        }
+
+        // --- CORE GAME ---
+        window.initGame = async () => {
             document.getElementById('confirmation-hud').style.display = 'none';
-            const blackCard = document.getElementById('main-black-card');
-            blackCard.style.opacity = '1'; blackCard.style.transform = 'scale(1)';
+            document.getElementById('main-black-card').style.opacity = '1';
             clearBoardState();
+
             try {
                 const manifest = await (await fetch(`${BASE_URL}/manifest.json`)).json();
                 const bId = String(Math.floor(Math.random() * manifest.stats.blackCardsCount) + 1).padStart(3, '0');
                 const bCard = await (await fetch(`${BASE_URL}/cards/black/prompt-${bId}.json`)).json();
                 document.getElementById('prompt-text').innerText = bCard.text;
+                
                 const handArea = document.getElementById('hand-area');
                 handArea.innerHTML = '';
-                let usedIds = new Set();
-                while(usedIds.size < 5) {
+
+                if (isGuest || !agent) {
+                    handArea.innerHTML = '<p style="color:#00ff88; width:100%; text-align:center; font-size:10px; font-weight:900; opacity:0.6;">SPECTATING MODE • ROOM: '+currentGameID+'</p>';
+                    return;
+                }
+
+                for(let i=0; i<5; i++) {
                     let rId = Math.floor(Math.random() * manifest.stats.whiteCardsCount) + 1;
-                    if(!usedIds.has(rId)) {
-                        usedIds.add(rId);
-                        const wCard = await (await fetch(`${BASE_URL}/cards/white/response-${String(rId).padStart(3, '0')}.json`)).json();
-                        const cardDiv = document.createElement('div');
-                        cardDiv.className = 'white-card';
-                        cardDiv.innerHTML = `<div class="card-text">${wCard.text}</div><div class="footer">Response Blob</div>`;
-                        setupTactileEvents(cardDiv, () => playCard(cardDiv), true);
-                        handArea.appendChild(cardDiv);
-                    }
+                    const wCard = await (await fetch(`${BASE_URL}/cards/white/response-${String(rId).padStart(3, '0')}.json`)).json();
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'white-card';
+                    cardDiv.innerHTML = `<div class="card-text">${wCard.text}</div><div class="footer">Response Blob</div>`;
+                    setupTactileEvents(cardDiv, () => playCard(cardDiv), true);
+                    handArea.appendChild(cardDiv);
                 }
             } catch (e) { console.error(e); }
+        };
+
+        // --- CZAR MODE ---
+        window.toggleCzarRole = () => {
+            isCzar = !isCzar;
+            const btn = document.getElementById('czar-mode-btn');
+            if (isCzar) {
+                btn.innerText = "Exit Czar Mode"; btn.style.background = "#00ff88"; btn.style.color = "#000";
+                startCzarView();
+            } else { location.reload(); }
+        };
+
+        function startCzarView() {
+            document.getElementById('table').innerHTML = `<div id="czar-grid" style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px; padding:20px; overflow-y:auto; height:100%;"></div>`;
+            document.getElementById('hand-area').style.display = 'none';
+            czarInterval = setInterval(scanTheSky, 4000);
+            scanTheSky();
         }
 
-        function clearBoardState() {
-            if (activeGhost) { activeGhost.remove(); activeGhost = null; }
-            if (originalCardSource) { originalCardSource.style.opacity = '1'; originalCardSource = null; }
-            document.getElementById('btn-capture').style.display = 'none';
-            document.getElementById('hand-area').style.transform = 'translateY(0)';
+        async function scanTheSky() {
+            if (!agent || !currentGameID) return;
+            try {
+                const response = await agent.api.app.bsky.feed.searchPosts({
+                    q: `app.skydrops.bats.card "${currentGameID}"`,
+                    limit: 25
+                });
+                const grid = document.getElementById('czar-grid');
+                response.data.posts.forEach(post => {
+                    if (!seenRecords.has(post.uri)) {
+                        seenRecords.add(post.uri);
+                        const card = document.createElement('div');
+                        card.className = 'white-card';
+                        card.style.transform = `rotate(${Math.random() * 8 - 4}deg)`;
+                        card.innerHTML = `<div class="card-text">${post.record.text}</div><div class="footer">BY @${post.author.handle}</div>`;
+                        grid.prepend(card);
+                        if (window.navigator.vibrate) window.navigator.vibrate(40);
+                    }
+                });
+            } catch (e) { }
         }
 
-        function sendToCzar() {
-            if (!activeGhost || !activeGhost.classList.contains('ghost-submitted')) return;
-            activeGhost.classList.add('ghost-sent');
-            document.getElementById('btn-capture').style.display = 'none';
-            document.getElementById('main-black-card').style.opacity = '0';
-            document.getElementById('main-black-card').style.transform = 'scale(0.8)';
-            if (window.navigator.vibrate) window.navigator.vibrate(60);
-            setTimeout(() => {
-                if(activeGhost) {
-                    activeGhost.remove(); activeGhost = null;
-                    document.getElementById('confirmation-hud').style.display = 'block';
-                }
-            }, 600);
-        }
+        // --- SUBMISSION & SHARING ---
+        window.sendToCzar = async () => {
+            if (!agent || !activeGhost) return;
+            try {
+                const text = activeGhost.querySelector('.card-text').innerText;
+                await agent.api.com.atproto.repo.createRecord({
+                    repo: agent.session.did,
+                    collection: 'app.skydrops.bats.card',
+                    record: { $type: 'app.skydrops.bats.card', text: text, gameID: currentGameID, createdAt: new Date().toISOString() }
+                });
+                activeGhost.classList.add('ghost-sent');
+                setTimeout(() => { document.getElementById('confirmation-hud').style.display = 'block'; }, 600);
+            } catch (err) { alert("Check connection."); }
+        };
 
+        window.shareToSky = () => {
+            const prompt = document.getElementById('prompt-text').innerText;
+            const response = activeGhost.querySelector('.card-text').innerText;
+            const text = encodeURIComponent(`I just cast a Blob into the Sky! 🦇🌌\n\n"${prompt}"\n\n→ "${response}"\n\nJoin the lobby: ${currentGameID} at bats.skydrops.app`);
+            window.open(`https://bsky.app/intent/compose?text=${text}`);
+        };
+
+        // --- UI UTILS ---
         function setupTactileEvents(el, action, isHandCard = false) {
             el.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX; startY = e.touches[0].clientY;
                 pressTimer = setTimeout(() => {
-                    if (isHandCard) { playCard(el); setTimeout(() => submitToCzar(), 50); }
+                    if (isHandCard) { playCard(el); setTimeout(submitToCzar, 50); }
                     else { submitToCzar(); }
                 }, 650);
             }, { passive: true });
-            el.addEventListener('touchmove', (e) => { if (Math.abs(e.touches[0].clientX - startX) > 15 || Math.abs(e.touches[0].clientY - startY) > 15) clearTimeout(pressTimer); }, { passive: true });
             el.addEventListener('touchend', (e) => {
                 clearTimeout(pressTimer);
-                const now = Date.now();
                 if (Math.abs(e.changedTouches[0].clientX - startX) < 10) {
-                    if (!isHandCard && activeGhost && activeGhost.classList.contains('ghost-submitted')) { sendToCzar(); }
-                    else if (now - lastTap < 300) { clearBoardState(); } 
-                    else if (action) { action(); }
-                    lastTap = now;
+                    if (!isHandCard && activeGhost?.classList.contains('ghost-submitted')) sendToCzar();
+                    else if (action) action();
                 }
             });
         }
 
         function playCard(cardDiv) {
-            if (activeGhost || originalCardSource) clearBoardState();
+            if (activeGhost) clearBoardState();
             const rect = cardDiv.getBoundingClientRect();
             const ghost = document.createElement('div');
-            ghost.className = 'ghost-card';
-            ghost.innerHTML = cardDiv.innerHTML;
-            ghost.style.left = rect.left + 'px'; ghost.style.top = rect.top + 'px';
+            ghost.className = 'ghost-card'; ghost.style.backgroundColor = '#fff';
+            ghost.innerHTML = cardDiv.innerHTML; ghost.style.left = rect.left + 'px'; ghost.style.top = rect.top + 'px';
             document.body.appendChild(ghost);
-            activeGhost = ghost; originalCardSource = cardDiv;
-            cardDiv.style.opacity = '0';
+            activeGhost = ghost; originalCardSource = cardDiv; cardDiv.style.opacity = '0.2';
             setupTactileEvents(ghost, null, false);
-            requestAnimationFrame(() => { requestAnimationFrame(() => { if (activeGhost) activeGhost.classList.add('ghost-played'); }); });
+            requestAnimationFrame(() => { requestAnimationFrame(() => { ghost.classList.add('ghost-played'); }); });
         }
 
         function submitToCzar() {
@@ -198,31 +301,34 @@
             activeGhost.classList.add('ghost-submitted');
             document.getElementById('btn-capture').style.display = 'block';
             document.getElementById('hand-area').style.transform = 'translateY(300px)';
-            if (window.navigator.vibrate) window.navigator.vibrate([40, 40, 40]);
         }
 
-        function takeScreenshot() {
-            if(!activeGhost) return;
+        function clearBoardState() {
+            if (activeGhost) { activeGhost.remove(); activeGhost = null; }
+            if (originalCardSource) { originalCardSource.style.opacity = '1'; }
+            document.getElementById('btn-capture').style.display = 'none';
+            document.getElementById('hand-area').style.transform = 'translateY(0)';
+        }
+
+        window.takeScreenshot = () => {
             const captureContainer = document.createElement('div');
-            captureContainer.style.cssText = 'display:flex; flex-direction:column; align-items:center; background:#050505; padding:30px; width:320px;';
-            const blackClone = document.querySelector('.black-card').cloneNode(true);
+            captureContainer.style.cssText = 'display:flex; flex-direction:column; align-items:center; background:#050505; padding:40px; width:360px;';
+            const blackClone = document.getElementById('main-black-card').cloneNode(true);
             const whiteClone = activeGhost.cloneNode(true);
-            const sw = '260px'; const sh = '360px';
-            blackClone.style.cssText = `position:static; width:${sw}; height:${sh}; border-radius:20px; background:#111; color:#fff; padding:30px; opacity:1 !important;`;
+            blackClone.style.cssText = `position:static; width:280px; height:380px; border-radius:24px; background:#111; color:#fff; padding:35px; margin-bottom: -120px; z-index: 1; border: 1px solid #1a237e;`;
             whiteClone.classList.remove('ghost-played', 'ghost-submitted');
-            whiteClone.style.cssText = `position:static; width:${sw}; height:${sh}; border-radius:20px; background:#fff; color:#000; padding:30px; margin-top:-80px; transform:rotate(-2deg);`;
-            whiteClone.querySelector('.card-text').style.cssText = 'font-weight:700; line-height:1.3; font-size:22px; color:#000 !important;';
+            whiteClone.style.cssText = `position:static; width:280px; height:380px; border-radius:24px; background:#fff; color:#000; padding:35px; transform:rotate(-4deg); z-index: 2; box-shadow: 0 20px 60px rgba(0,0,0,0.8);`;
             captureContainer.appendChild(blackClone); captureContainer.appendChild(whiteClone);
             document.body.appendChild(captureContainer);
             html2canvas(captureContainer, { backgroundColor: '#050505', scale: 2 }).then(canvas => {
                 const imgData = canvas.toDataURL("image/png");
                 captureContainer.remove();
                 const win = window.open();
-                if (win) { win.document.write(`<body style="margin:0; background:#050505; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;"><img src="${imgData}" style="max-width:90%; border-radius:15px;" /><p style="color:white; font-family:sans-serif; margin-top:20px;">Long-press to save</p></body>`);
-                } else { const link = document.createElement('a'); link.download = 'BATS-Combination.png'; link.href = imgData; link.click(); }
+                win.document.write(`<body style="margin:0; background:#050505; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;"><img src="${imgData}" style="max-width:90%; border-radius:15px;" /><p style="color:#00ff88; font-family:sans-serif; margin-top:20px; font-weight:900;">LONG-PRESS TO SAVE IMAGE</p></body>`);
             });
-        }
-        initGame();
+        };
+
+        initAuth();
     </script>
 </body>
 </html>
