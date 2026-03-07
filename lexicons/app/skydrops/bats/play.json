@@ -1,0 +1,41 @@
+{
+  "lexicon": 1,
+  "id": "app.skydrops.bats.play",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A single B.A.T.S. game round play (matching a white card to a black card).",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["promptAtUri", "responseAtUri", "playerDid", "createdAt"],
+        "properties": {
+          "promptAtUri": { 
+            "type": "string", 
+            "format": "at-uri",
+            "description": "The unique ID (AT-URI) of the Black Card being answered." 
+          },
+          "responseAtUri": { 
+            "type": "string", 
+            "format": "at-uri",
+            "description": "The unique ID (AT-URI) of the White Card the player chose." 
+          },
+          "playerDid": { 
+            "type": "string", 
+            "format": "did",
+            "description": "The DID of the player making this move." 
+          },
+          "winner": { 
+            "type": "boolean", 
+            "default": false,
+            "description": "True if the Card Czar picked this as the winning blob." 
+          },
+          "createdAt": { 
+            "type": "string", 
+            "format": "datetime" 
+          }
+        }
+      }
+    }
+  }
+}
