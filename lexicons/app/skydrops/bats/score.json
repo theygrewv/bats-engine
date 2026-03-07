@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "app.skydrops.bats.score",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A final score record for a Player at the end of a B.A.T.S. session.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["sessionUri", "playerDid", "lovesCount", "createdAt"],
+        "properties": {
+          "sessionUri": { 
+            "type": "string", 
+            "format": "at-uri",
+            "description": "The URI of the session this score belongs to." 
+          },
+          "playerDid": { 
+            "type": "string", 
+            "format": "did",
+            "description": "The DID of the Player who earned these points." 
+          },
+          "lovesCount": { 
+            "type": "integer", 
+            "description": "Total 'Loves' earned by the Player.",
+            "minimum": 0 
+          },
+          "rank": { 
+            "type": "string", 
+            "description": "The Player's earned title (e.g., 'High Bat', 'Devious Blob')." 
+          },
+          "createdAt": { 
+            "type": "string", 
+            "format": "datetime" 
+          }
+        }
+      }
+    }
+  }
+}
