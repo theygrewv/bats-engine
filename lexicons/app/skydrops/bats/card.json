@@ -1,34 +1,17 @@
 {
-  "lexicon": 1,
+  "lex": 1,
   "id": "app.skydrops.bats.card",
   "defs": {
     "main": {
       "type": "record",
-      "description": "A single B.A.T.S. game card (Black or White).",
-      "key": "tid",
+      "description": "A single card cast into the sky for B.A.T.S.",
       "record": {
         "type": "object",
-        "required": ["text", "type", "createdAt"],
+        "required": ["text", "gameID", "createdAt"],
         "properties": {
-          "text": { 
-            "type": "string", 
-            "description": "The horrible text on the card.",
-            "maxGraphemes": 300 
-          },
-          "type": { 
-            "type": "string", 
-            "knownValues": ["prompt", "response"],
-            "description": "Prompt (Black) or Response (White)." 
-          },
-          "authorDid": { 
-            "type": "string", 
-            "format": "did",
-            "description": "The DID of the devious mind who wrote this." 
-          },
-          "createdAt": { 
-            "type": "string", 
-            "format": "datetime" 
-          }
+          "text": { "type": "string", "maxLength": 1000 },
+          "gameID": { "type": "string", "maxLength": 12 },
+          "createdAt": { "type": "string", "format": "datetime" }
         }
       }
     }
