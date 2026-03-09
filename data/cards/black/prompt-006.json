@@ -1,6 +1,7 @@
 {
   "text": "My therapist says the voice in my head isn't me, it's just ________ trying to sell me a subscription to my own liver.",
   "type": "prompt",
+  "pack": "OG_PACK_001",
   "authorDid": "did:plc:5t5u6shyc4wwrenyzk4ok5rx",
   "createdAt": "2026-03-07T12:00:00Z"
 }
