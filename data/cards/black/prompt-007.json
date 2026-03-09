@@ -1,6 +1,7 @@
 {
   "text": "Grandpa didn't leave a will. He just left a damp shoebox full of ________ and a note that says 'Don't let it touch the carpet.'",
   "type": "prompt",
+  "pack": "OG_PACK_001",
   "authorDid": "did:plc:5t5u6shyc4wwrenyzk4ok5rx",
   "createdAt": "2026-03-07T12:01:00Z"
 }
