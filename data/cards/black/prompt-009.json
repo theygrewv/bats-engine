@@ -1,6 +1,7 @@
 {
   "text": "The local priest was defrocked after they found ________ hidden inside the hollowed-out communion bread.",
   "type": "prompt",
+  "pack": "OG_PACK_001",
   "authorDid": "did:plc:5t5u6shyc4wwrenyzk4ok5rx",
   "createdAt": "2026-03-07T12:03:00Z"
 }
