@@ -1,6 +1,7 @@
 {
   "text": "Asking for the Wi-Fi password at a closed-casket funeral.",
   "type": "response",
+  "pack": "OG_PACK_001",
   "authorDid": "did:plc:5t5u6shyc4wwrenyzk4ok5rx",
   "createdAt": "2026-03-07T16:10:00Z"
 }
