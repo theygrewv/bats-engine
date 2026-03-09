@@ -1,6 +1,7 @@
 {
   "text": "I opened the box and found ________ staring back at me.",
   "type": "prompt",
+  "pack": "OG_PACK_001",
   "authorDid": "did:plc:5t5u6shyc4wwrenyzk4ok5rx",
   "createdAt": "2026-03-07T08:34:00Z"
 }
